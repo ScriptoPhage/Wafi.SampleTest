@@ -22,10 +22,12 @@ namespace Wafi.SampleTest.Controllers
 
         // GET: api/Bookings
         [HttpGet("GetBookings")]
-        public async Task<ActionResult<IEnumerable<BookingCalendarDto>>> GetCalendarBookings([FromBody] BookingFilterDto input)
+        public async Task<ActionResult<IEnumerable<BookingCalendarDto>>> GetCalendarBookings([FromQuery] BookingFilterDto input)
         {
+            // TO DO: convert the database bookings to calendar view (date, start time, end time). Consiser NoRepeat, Daily and Weekly options
             // Get booking from the database and filter the data
             var bookingsQuery =  _context.Bookings.AsQueryable();
+            
             bookingsQuery = bookingsQuery.Include(e => e.Car).Where(e => e.CarId == input.CarId);
 
             var bookingCalendarDTOs = new List<BookingCalendarDto>();
@@ -40,11 +42,9 @@ namespace Wafi.SampleTest.Controllers
             }
             return Ok(bookingCalendarDTOs);
 
-            //var bookings = await bookingsQuery.ToListAsync();
-            //var bookings = await _context.Bookings.ToListAsync();
+        
 
-            // TO DO: convert the database bookings to calendar view (date, start time, end time). Consiser NoRepeat, Daily and Weekly options
-            //return bookings;
+
         }
 
         // POST: api/Bookings
