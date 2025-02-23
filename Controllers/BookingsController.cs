@@ -21,35 +21,34 @@ namespace Wafi.SampleTest.Controllers
         }
 
         // GET: api/Bookings
-        [HttpGet("Booking")]
-        public async Task<IEnumerable<BookingCalendarDto>> GetCalendarBookings(BookingFilterDto input)
+        [HttpGet("GetBookings")]
+        public async Task<ActionResult<IEnumerable<BookingCalendarDto>>> GetCalendarBookings([FromBody] BookingFilterDto input)
         {
             // Get booking from the database and filter the data
-            //var bookingsQuery = _context.Bookings.AsQueryable();
+            var bookingsQuery =  _context.Bookings.AsQueryable();
+            bookingsQuery = bookingsQuery.Include(e => e.Car).Where(e => e.CarId == input.CarId);
 
-            //if (input.StartBookingDate != null &&)
-            //{
-            //    bookingsQuery = bookingsQuery.Where(b => b.StartDate >= input.StartDate.Value);
-            //}
-
-            //if (input.EndDate.HasValue)
-            //{
-            //    bookingsQuery = bookingsQuery.Where(b => b.EndDate <= input.EndDate.Value);
-            //}
+            var bookingCalendarDTOs = new List<BookingCalendarDto>();
+            foreach(Booking booking in bookingsQuery)
+            {
+                var bookedDates = extractAllDatesInABooking(booking);
+                if (bookedDates.First() >= input.StartBookingDate 
+                    && bookedDates.Last() <= input.EndBookingDate)
+                {
+                    bookingCalendarDTOs.Add(booking.ToBookingCalendarDTOFromBooking());
+                }
+            }
+            return Ok(bookingCalendarDTOs);
 
             //var bookings = await bookingsQuery.ToListAsync();
             //var bookings = await _context.Bookings.ToListAsync();
 
             // TO DO: convert the database bookings to calendar view (date, start time, end time). Consiser NoRepeat, Daily and Weekly options
             //return bookings;
-
-
-
-            throw new NotImplementedException();
         }
 
         // POST: api/Bookings
-        [HttpPost("Booking")]
+        [HttpPost("CreateBooking")]
         public async Task<ActionResult<CreateUpdateBookingDto>> PostBooking(CreateUpdateBookingDto booking) 
         {
             // TO DO: Validate if any booking time conflicts with existing data. Return error if any conflicts
