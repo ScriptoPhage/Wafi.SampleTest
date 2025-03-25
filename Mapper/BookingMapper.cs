@@ -7,11 +7,11 @@ namespace Wafi.SampleTest.Mapper
     public static class BookingMapper
     {
 
-        public static BookingCalendarDto ToBookingCalendarDTOFromBooking(this Booking booking)
+        public static BookingCalendarDto ToBookingCalendarDTOFromBooking(this Booking booking, DateOnly date)
         {
             return new BookingCalendarDto
             {
-                BookingDate = booking.BookingDate,
+                BookingDate = date,
                 StartTime = booking.StartTime,
                 EndTime = booking.EndTime,
                 CarModel = booking.Car.Model

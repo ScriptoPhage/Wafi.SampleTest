@@ -31,15 +31,22 @@ namespace Wafi.SampleTest.Controllers
             bookingsQuery = bookingsQuery.Include(e => e.Car).Where(e => e.CarId == input.CarId);
 
             var bookingCalendarDTOs = new List<BookingCalendarDto>();
+            IEnumerable<DateOnly> bookedDates;
             foreach(Booking booking in bookingsQuery)
             {
-                var bookedDates = extractAllDatesInABooking(booking);
-                if (bookedDates.First() >= input.StartBookingDate 
-                    && bookedDates.Last() <= input.EndBookingDate)
+
+                bookedDates = extractAllDatesInABooking(booking);
+                if (bookedDates.First() >= input.StartBookingDate && bookedDates.Last() <= input.EndBookingDate)
                 {
-                    bookingCalendarDTOs.Add(booking.ToBookingCalendarDTOFromBooking());
+                    foreach (DateOnly date in bookedDates)
+                    {
+                        bookingCalendarDTOs.Add(booking.ToBookingCalendarDTOFromBooking(date));
+                    }
                 }
+
+
             }
+            bookingCalendarDTOs.Sort(delegate (BookingCalendarDto b1, BookingCalendarDto b2) { return b1.BookingDate.CompareTo(b2.BookingDate);  });
             return Ok(bookingCalendarDTOs);
 
         
@@ -199,7 +206,7 @@ namespace Wafi.SampleTest.Controllers
             if (booking.RepeatOption == RepeatOption.Weekly)
             {
                 var currentDate = booking.BookingDate;
-                dates.Add(currentDate);
+                //dates.Add(currentDate);
                 while (currentDate <= booking.EndRepeatDate)
                 {
                     foreach (DaysOfWeek day in Enum.GetValues(typeof(DaysOfWeek)))
